@@ -1,0 +1,108 @@
+<?php
+/**
+ * @var Magento\Framework\View\Element\Template $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+$carInfo = $block->getCarInfo();
+$customerCars = $carInfo->getCarByCustomerId();
+
+//echo "<pre>";
+//print_r($carsList);
+?>
+<style>
+    .container {
+        /* display: flex; */
+    }
+
+    .table-row,
+    .table {
+        display: flex;
+        align-content: center;
+    }
+
+    .car-data,
+    .table-head {
+        text-align: center;
+        width: 200px;
+        border: 1px solid black;
+    }
+
+    .table-head {
+        font-weight: bold;
+        background-color: #f2f2f2; /* light grey */
+        border-bottom: 2px solid black; /* border bottom for header */
+    }
+
+    .even-row {
+        background-color: #f9f9f9; /* lighter grey for even rows */
+    }
+</style>
+
+<div class="message"></div>
+
+<div class="container">
+    <?php
+    $count =0;
+    if(count($customerCars)>0){
+        $carsList = $carInfo->getCarsListById($customerCars['car_id']);
+        ?>
+        <div class="table">
+            <div class="table-head">id</div>
+            <div class="table-head">year</div>
+            <div class="table-head">make</div>
+            <div class="table-head">model</div>
+            <div class="table-head">Action</div>
+        </div>
+        <?php foreach ($carsList['cars'] as $car): ?>
+            <div class="table-row <?= ($count % 2 == 0) ? 'even-row' : '' ?>">
+                    <div class="car-data"><?= $escaper->escapeHtml($car['id']) ?></div>
+                    <div class="car-data"><?= $escaper->escapeHtml($car['year']) ?></div>
+                    <div class="car-data"><?= $escaper->escapeHtml($car['make']) ?></div>
+                    <div class="car-data"><?= $escaper->escapeHtml($car['model']) ?></div>
+                    <div class="car-data">
+                        <span><button type="button" disabled>Edit</button></span>
+                        <span><button class="submit" data-element="<?= $escaper->escapeHtml($car['id']) ?>" type="submit">Delete</button></span>
+                    </div>
+
+            </div>
+            <?php $count++; ?>
+        <?php endforeach; ?>
+    <?php }
+    else{
+        echo "No record found";
+    }
+    ?>
+
+</div>
+
+<script>
+    require(['jquery'], function($) {
+        $(document).ready(function() {
+            $('.submit').click(function(e) {
+                // var checkedValues = [];
+                // $('.car-id:checked').each(function() {
+                //     checkedValues.push($(this).val());
+                // });
+                var data = {
+                    id:$(".submit").attr("data-element")
+                }
+                $.ajax({
+                    url: '<?php echo $block->getUrl('razoyocarprofile/customer/delete'); ?>',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: data,
+                    success: function(response) {
+                        location.reload();
+                        console.log(response.message);
+                        // Handle the response
+                    },
+                    error: function(xhr, status, error) {
+                        location.reload();
+                        console.error(xhr.responseText);
+                    }
+                });
+            });
+        });
+    });
+</script>
+
