@@ -53,9 +53,9 @@ class CarApiService
     /**
      * Fetch some data from API
      */
-    public function execute($params = [])
+    public function execute()
     {
-        return $this->getCarList(static::API_REQUEST_ENDPOINT,$params);
+        return $this->getCarList(static::API_REQUEST_ENDPOINT);
     }
 
     /**
@@ -91,6 +91,47 @@ class CarApiService
             ]);
         }
 
+        return $response;
+    }
+
+    /**
+     * @param string $id
+     * @param array $params
+     * @param string $uriEndpoint
+     * @param string $requestMethod
+     * @return Response|\Psr\Http\Message\ResponseInterface
+     */
+    public function getCarListById(
+        string $id,
+        array $params = [],
+        string $uriEndpoint = CarApiService::API_REQUEST_ENDPOINT,
+        string $requestMethod = Request::HTTP_METHOD_GET
+    ){
+        /** @var Client $client */
+        $client = $this->clientFactory->create(['config' => [
+            'base_uri' => self::API_REQUEST_URI
+        ]]);
+
+        try {
+            $tokenResponse = $this->getCarList(static::API_REQUEST_ENDPOINT);
+            $tokenResponse = $tokenResponse->getHeaders();
+            $token = $tokenResponse['your-token'][0];
+            $params['headers'] = [
+                'Authorization' => 'Bearer ' . $token
+            ];
+            $uriEndpoint .= urlencode($id);
+            $response = $client->request(
+                $requestMethod,
+                $uriEndpoint,
+                $params
+            );
+        } catch (GuzzleException $exception) {
+            /** @var Response $response */
+            $response = $this->responseFactory->create([
+                'status' => $exception->getCode(),
+                'reason' => $exception->getMessage()
+            ]);
+        }
         return $response;
     }
 }

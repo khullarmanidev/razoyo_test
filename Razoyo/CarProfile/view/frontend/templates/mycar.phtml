@@ -1,12 +1,14 @@
 <?php
 /**
  * @var Magento\Framework\View\Element\Template $block
+ * @var \Magento\Framework\Escaper $escaper
  */
 $carInfo = $block->getCarInfo();
 $carsList = $carInfo->getCarsList();
+$id = $this->getRequest()->getParam('id');
 ?>
 <form class="form carprofile"
-      action="<?= $carInfo->getSaveUrl() ?>"
+      action="<?= $escaper->escapeUrl(isset($id) ? $carInfo->getSaveUrl() . "?id=" . $id : $carInfo->getSaveUrl()) ?>"
       id="customer-carprofile-form"
       method="post"
       data-hasrequired="<?php  echo __('* Required Fields') ?>"
@@ -19,7 +21,7 @@ $carsList = $carInfo->getCarsList();
                     <option value=""><?= __('Please Select') ?></option>
                     <?php foreach($carsList['cars'] as $car): ?>
                         <?php if(!empty($car['id'])): ?>
-                            <option value="<?= $car['id'] ?>"><?= $car['make'].' '.$car['model'] ?></option>
+                            <option value="<?= $car['id'] ?>" <?=(!empty($id) && $car['id'] == $id) ? 'selected' : "" ?>><?= $car['make'].' '.$car['model'] ?></option>
                         <?php endif; ?>
                     <?php endforeach; ?>
                 </select>

@@ -72,7 +72,7 @@ class CarInfo implements ArgumentInterface
      */
     public function getCarsListById($id)
     {
-        $response = $this->carApiService->execute([$id]);
+        $response = $this->carApiService->getCarListById($id);
         if ($response->getStatusCode() == 200) {
             $responseBody = $response->getBody();
             return $this->serializer->unserialize($responseBody->getContents());
